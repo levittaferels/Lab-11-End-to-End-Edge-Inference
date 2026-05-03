@@ -1,70 +1,26 @@
-# Week 10 – Networking & Protocols: Interactive Dashboard
+# Lab 11: End-to-End Edge Inference (Quantized TFLite)
 
-## Objective
+## 📌 Overview
+You have optimized your pre-processing pipeline using pure NumPy (W9) and efficient Interpolation (W10). Now, it's time to connect it to an actual Edge AI Inference Engine. 
 
-This week, you will enhance your Streamlit dashboard with **interactive controls** and use **real data**
-from your monitoring system (`log.db` generated in Week 7–8).
+In this lab, you will **not** train or quantize a model. Instead, mirroring industry practice, you will download a pre-quantized **INT8 MobileNetV1** model from Google and build a highly efficient inference pipeline around it.
 
----
+## 🎯 Learning Objectives
+1. Understand how to load and allocate tensors in a TensorFlow Lite Interpreter.
+2. Experience the strict data type constraints of **INT8 Quantization** (No `float32` allowed!).
+3. Profile the end-to-end latency breakdown: Pre-processing vs. Neural Network Inference.
 
-## Data Source
+## 🛠️ Instructions
+1. **Prepare Environment**: 
+   Ensure you have the required packages installed in your GitHub VM:
+   `pip install tflite-runtime numpy opencv-python urllib3`
+   *(Note: If `tflite-runtime` fails on your specific OS, you can use `pip install tensorflow` as a fallback, but `tflite-runtime` is the Edge standard).*
+2. **Execute Script**: 
+   Run `python lab11_edge_inference.py`. It will automatically download the quantized MobileNet model and a standard test image (Grace Hopper).
+3. **Complete the TODOs**:
+   - **TODO 1**: Initialize the TFLite Interpreter and allocate memory.
+   - **TODO 2**: Inject your W9/W10 NumPy pre-processing logic (Resize, BGR to RGB, Expand Dims). **Data must remain as `uint8`**.
+   - **TODO 3**: Set the input tensor, invoke the engine, and retrieve the output tensor.
 
-Your dashboard uses the **same database** you created in:
-- Week 7 (SQLite Logging)
-- Week 8 (Alert System Updates)
-
-If your `log.db` file is missing or empty, please re-run your Week 8 `main.py`
-to generate log entries before running this assignment.
-
----
-
-## Tasks
-
-1. Add a **sidebar navigation menu**:
-   - Dashboard
-   - Settings
-   - About
-2. Implement **auto-refresh** or **manual refresh** button.
-3. Add **filter controls**:
-   - Ping_Status (All / UP / DOWN)
-   - CPU Threshold slider
-4. Display filtered data and charts for CPU, Memory, Disk.
-5. Include a short description on the Settings and About pages.
-
----
-
-## Example Output
-
-- Sidebar with navigation
-- Filtered data table
-- Dynamic line charts
-- Refresh button or timer
-
----
-
-## Run the Dashboard
-
-```bash
-streamlit run app.py
-```
-
-Make sure log.db is in the same directory.
-
-## Submission Checklist
-
- app.py includes sidebar, filters, and refresh
-
- Charts render correctly
-
- Screenshot of dashboard with filters
-
- Code pushed to GitHub
- ---
-
-## Bonus (Optional)
-
-Add a date filter using st.date_input
-
-Display alert count (how many records exceeded thresholds)
-
-Add Dark Mode toggle in the Settings page
+## ✅ Expected Output
+Your terminal should successfully predict "military uniform" and print a clear latency breakdown (e.g., Pre-processing: X ms, Inference: Y ms).
