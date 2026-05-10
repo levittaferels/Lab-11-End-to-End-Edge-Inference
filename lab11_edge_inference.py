@@ -12,7 +12,7 @@ import zipfile
 
 # 嘗試載入輕量版推論引擎 (Edge 專用)
 try:
-    import tflite_runtime.interpreter as tflite
+    import tensorflow.lite as tflite
     print("[*] Successfully loaded tflite_runtime.")
 except ImportError:
     print("[!] tflite_runtime not found. Falling back to full tensorflow.lite...")
@@ -59,10 +59,11 @@ if __name__ == "__main__":
     # 2. Allocate tensors (allocate_tensors()).
     # 3. Get input and output details (get_input_details(), get_output_details()).
     # ---------------------------------------------------------
-    # interpreter = ...
+    interpreter = tflite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
     
-    input_details = [{'index': 0}]   # Placeholder, remove this
-    output_details = [{'index': 0}]  # Placeholder, remove this
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_input_details()
     
     print(f"[*] Model Loaded: {model_path}")
 
@@ -84,10 +85,14 @@ if __name__ == "__main__":
     # [CRITICAL EDGE RULE]: Because the model is INT8 Quantized, 
     # DO NOT cast to float32. Keep the data type as uint8!
     # ---------------------------------------------------------
-    # input_data = ...
     
-    input_data = np.zeros((1, 224, 224, 3), dtype=np.uint8) # Placeholder
+    resized = cv2.resize(image, (224, 224), interpolation=cv2.INTER_LINEAR)
+
+    #BGR to RGB
+    rgb_image = resized[:, :, ::-1]
     
+    input_data = np.expand_dims(rgb_image, axis=0)
+
     t_pre = (time.perf_counter() - t0) * 1000
 
     # =========================================================
@@ -101,12 +106,12 @@ if __name__ == "__main__":
     # 2. Invoke the engine (invoke()).
     # 3. Retrieve the output tensor (get_tensor) using the output index.
     # ---------------------------------------------------------
-    # interpreter.set_tensor(input_details[0]['index'], input_data)
-    # ...
-    # output_data = ...
+    interpreter.set_tensor(input_details[0]['index'], input_data)
     
-    output_data = np.zeros((1, 1001)) # Placeholder
-    
+    interpreter.invoke()
+
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+     
     t_inf = (time.perf_counter() - t1) * 1000
     
     # =========================================================
